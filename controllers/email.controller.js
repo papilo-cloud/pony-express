@@ -32,17 +32,37 @@ let createEmailRoute = async (req, res) => {
 // things simple. Production backends would typically use a DB anyways
 let updateEmailRoute = async (req, res) => {
     let email = emails.find(email => email.id == req.params.id)
+    // req.authorize(email)
     Object.assign(email, req.body) 
     res.status(200)
     res.send(email)
 }
 
+let updateEmailPolicy = (req) => {
+    let email = emails.find(email => email.id == req.params.id)
+    let user = req.user
+    return user.id == email.from
+}
+
 let deleteEmailRoute = (req, res) => {
+    // req.authorize(email)
     let index = emails.findIndex(email => email.id == req.params.id)
     emails.splice(index, 1)
     res.sendStatus(204)
 }
 
+let deleteEmailPolicy = (req) => {
+    let email = emails.find(email => email.id == req.params.id)
+    let user = req.user
+    return user.id == email.to
+}
+
+let emailAttachmentPolicy = (req) => {
+    let email = emails.find(email => email.id == req.params.id)
+    let user = req.user
+    return user.id == email.from || user.id == email.to
+
+}
 const storage = multer.diskStorage({
     destination: (req, res, cb) => {
         cb(null, 'uploads')
@@ -54,4 +74,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage})
 
-module.exports = {getEmailsRoute, getEmailRoute, createEmailRoute, updateEmailRoute, deleteEmailRoute, upload}
+module.exports = {getEmailsRoute, getEmailRoute, 
+    createEmailRoute, updateEmailRoute, deleteEmailRoute,
+    upload,
+    updateEmailPolicy,
+    deleteEmailPolicy,
+    emailAttachmentPolicy}
