@@ -9,13 +9,14 @@ const enforce = require('../lib/enforce')
 //     dest: path.join(__dirname, '../uploads')
 // })
 
+
 emailsRouter.use(requireAuth)
 
 emailsRouter.route('/')
     .get(emailController.getEmailsRoute)
     .post(emailController.upload.array('file'), emailController.createEmailRoute)
 emailsRouter.route('/:id')
-    .get(emailController.getEmailRoute)
+    .get(enforce(emailController.getEmailPolicy), emailController.getEmailRoute)
     .put(enforce(emailController.updateEmailPolicy), emailController.updateEmailRoute)
     .delete(enforce(emailController.deleteEmailPolicy), emailController.deleteEmailRoute)
 
