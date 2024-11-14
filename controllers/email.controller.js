@@ -12,8 +12,14 @@ let getEmailsRoute = (req, res, next) => {
     res.send(emails)
 }
 
+let getEmailPolicy = (user, email) => {
+    console.log(user)
+    return user.id == email.to
+}
+
 let getEmailRoute = (req, res) => {
     let email = emails.find(email => email.id == req.params.id)
+    req.authorize(email)
     if (!email) {
         throw new NotFound();
     }
@@ -30,30 +36,27 @@ let createEmailRoute = async (req, res) => {
 
 // Mutation is generally a bad practice, but we just used mutation to keep
 // things simple. Production backends would typically use a DB anyways
-let updateEmailRoute = async (req, res) => {
+let updateEmailRoute = (req, res) => {
     let email = emails.find(email => email.id == req.params.id)
-    // req.authorize(email)
+    req.authorize(email)
     Object.assign(email, req.body) 
     res.status(200)
     res.send(email)
 }
 
-let updateEmailPolicy = (req) => {
-    let email = emails.find(email => email.id == req.params.id)
-    let user = req.user
+let updateEmailPolicy = (user, email) => {
     return user.id == email.from
 }
 
 let deleteEmailRoute = (req, res) => {
-    // req.authorize(email)
+    let email = emails.find(email => email.id == req.params.id)
+    req.authorize(email)
     let index = emails.findIndex(email => email.id == req.params.id)
     emails.splice(index, 1)
     res.sendStatus(204)
 }
 
-let deleteEmailPolicy = (req) => {
-    let email = emails.find(email => email.id == req.params.id)
-    let user = req.user
+let deleteEmailPolicy = (user, email) => {
     return user.id == email.to
 }
 
@@ -79,4 +82,5 @@ module.exports = {getEmailsRoute, getEmailRoute,
     upload,
     updateEmailPolicy,
     deleteEmailPolicy,
-    emailAttachmentPolicy}
+    emailAttachmentPolicy,
+    getEmailPolicy}
